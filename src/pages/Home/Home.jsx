@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import './Home.css'
 import Navbar from '../../components/Navbar/Navbar'
 
@@ -8,18 +8,37 @@ import play_icon from '../../assets/play_icon.png'
 import info_icon from '../../assets/info_icon.png'
 import TitleCards from '../../components/TitleCards/TitleCards'
 import Footer from '../../components/Footer/Footer'
+import axios from '../../axios'
+import { imageUrl, API_KEY } from '../../constants/constants'
+
+import { Link } from 'react-router-dom'
+
+
 
 const Home = () => {
+
+  const [movie, setMovie] = useState()
+
+  useEffect(() => {
+    axios.get(`/trending/all/week?api_key=${API_KEY}&language=en-US`).then((response) => {
+      console.log(response.data.results[0]);
+      setMovie(response.data.results[Math.floor(Math.random() * 25)]);
+  })
+  }, [])
+
   return (
     <div className='home'>
         <Navbar/>
         <div className="hero">
-          <img src={hero_banner} alt="" className='banner-img' />
+          <img src={movie ? `${imageUrl}${movie.backdrop_path}` : `${hero_banner}`} alt="" className='banner-img' />
           <div className="hero-caption">
-            <img src={hero_title} alt=""className='caption-img' />
-            <p>Discovering his ties to a secret ancient order, a young man living in modern Istanbul embarks on a quest to save the city from an immortal enemy.</p>
+            <h1 className='caption-img'>{movie ? movie.original_title || movie.name : ''}</h1>
+            <p>{movie ? movie.overview : ''}</p>
             <div className="hero-btns">
-              <button className='btn'><img src={play_icon} alt="" />Play</button>
+            <Link to={ movie ? `/player/${movie.id}` : ''}>
+              <button className='btn' ><img src={play_icon} alt="" />Play</button>
+              </Link>
+             
               <button className='btn dark-btn'><img src={info_icon} alt="" />More Info</button>
             </div>
             <TitleCards/>
